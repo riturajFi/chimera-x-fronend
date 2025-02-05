@@ -27,8 +27,8 @@ const Navbar: React.FC = () => {
         <button className="bg-black text-white px-4 py-2 rounded-full font-semibold shadow-sm">
           Chat
         </button>
-        <button className="text-gray-600 px-4 py-2">My Project</button>
-        <button className="text-gray-600 px-4 py-2">Brand Voice</button>
+        <button className="text-gray-600 px-4 py-2">Settings</button>
+        <button className="text-gray-600 px-4 py-2">Notification</button>
         <button className="text-gray-600 px-4 py-2">Templates</button>
         <button className="text-gray-600 px-4 py-2">Tools</button>
       </nav>{" "}

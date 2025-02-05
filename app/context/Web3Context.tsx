@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ethers } from "ethers";
-import { CURVE_CONTRACT_ABI } from "../constants/curveAbi";
+import { CURVE_CONTRACT_ABI } from "../constants/curve_abi";
+import { USDC_BASE_CONTRACT_ABI } from "../constants/USDC_Base_Abi";
+import { USDC_contract_proxy_address } from "../constants/contract_addresses";
 
 // Curve Smart Contract Information
 const CURVE_CONTRACT_ADDRESS = "0x11C1fBd4b3De66bC0565779b35171a6CF3E71f59";
@@ -14,6 +16,7 @@ interface Web3ContextType {
     minMintAmount: bigint,
     useEth: boolean
   ) => Promise<void>;
+  approveSpender: () => Promise<void>;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -23,7 +26,6 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
-  // 1️⃣ Connect MetaMask Wallet
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("MetaMask not detected. Please install it.");
@@ -47,7 +49,6 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  // 2️⃣ Add Liquidity (Uses MetaMask)
   const addLiquidity = async (
     amounts: bigint[],
     minMintAmount: bigint,
@@ -89,9 +90,41 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const approveSpender = async () => {
+    if (!window.ethereum || !walletAddress) {
+      alert("Please connect your MetaMask wallet first.");
+      return;
+    }
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        USDC_contract_proxy_address,
+        USDC_BASE_CONTRACT_ABI,
+        signer
+      );
+
+      // Hardcoded values
+      const spender = "0xf6C5F01C7F3148891ad0e19DF78743D31E390D1f";
+      const value = BigInt(
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      );
+
+      // ✅ Call approve function
+      const tx = await contract.approve(spender, value);
+      alert(`Transaction Sent! Tx Hash: ${tx.hash}`);
+
+      await tx.wait();
+      alert("Approval Successful!");
+    } catch (error) {
+      console.error("Approval failed:", error);
+    }
+  };
+
   return (
     <Web3Context.Provider
-      value={{ walletAddress, connectWallet, addLiquidity }}
+      value={{ walletAddress, connectWallet, addLiquidity, approveSpender }}
     >
       {children}
     </Web3Context.Provider>

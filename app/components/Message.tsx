@@ -1,28 +1,14 @@
-import {
-  Transaction,
-  TransactionButton,
-  TransactionDefault,
-  TransactionStatus,
-  TransactionStatusAction,
-  TransactionStatusLabel,
-} from "@coinbase/onchainkit/transaction";
-import React, { useState } from "react";
-import {
-  mintABI,
-  mintContractAddress,
-  BASE_SEPOLIA_CHAIN_ID,
-} from "./consants";
-import { ContractFunctionParameters } from "viem";
+import React from "react";
 import { useWeb3 } from "../context/Web3Context";
 import { ethers } from "ethers";
 
-// Define the Message interface
+// ✅ Define Message Props
 interface MessageProps {
   sender: "User" | "Bot";
   text: string;
 }
 
-// Define the Liquidity Balance Data structure
+// ✅ Define Liquidity Balance Data Structure
 interface LiquidityBalanceData {
   [category: string]: {
     chain_name: string;
@@ -34,12 +20,26 @@ interface LiquidityBalanceData {
   }[];
 }
 
-// Function to check if the text is JSON and parse it
-const parseJSON = (text: string): LiquidityBalanceData | null => {
+// ✅ Define Optimized Yield Data Structure
+interface OptimizedYieldData {
+  before: { [key: string]: number };
+  after: { [key: string]: number };
+  change: { [key: string]: number };
+  total_optimized_yield: number;
+}
+
+// ✅ Function to classify JSON type
+const parseJSON = (
+  text: string
+): { type: "liquidity" | "yield"; data: any } | null => {
   try {
     const data = JSON.parse(text);
     if (typeof data === "object" && data !== null) {
-      return data as LiquidityBalanceData;
+      if ("curve" in data || "aave" in data || "lido" in data) {
+        return { type: "liquidity", data: data as LiquidityBalanceData };
+      } else if ("before" in data && "after" in data && "change" in data) {
+        return { type: "yield", data: data as OptimizedYieldData };
+      }
     }
   } catch (error) {
     return null;
@@ -47,12 +47,12 @@ const parseJSON = (text: string): LiquidityBalanceData | null => {
   return null;
 };
 
-// ✅ Function to render standard text messages
+// ✅ Component to render standard text messages
 const TextMessage: React.FC<{ text: string }> = ({ text }) => (
   <p className="text-gray-900 text-lg font-medium">{text}</p>
 );
 
-// ✅ Function to render Liquidity Data in a structured format
+// ✅ Component to render Liquidity Data
 const LiquidityMessage: React.FC<{ data: LiquidityBalanceData }> = ({
   data,
 }) => (
@@ -100,34 +100,76 @@ const LiquidityMessage: React.FC<{ data: LiquidityBalanceData }> = ({
   </div>
 );
 
-// ✅ Main Message Component (Organized & Extendable)
-const Message: React.FC<MessageProps> = ({ sender, text }) => {
-  const { walletAddress, addLiquidity } = useWeb3();
-  const hardcodedAmounts = ["8122411380", "0"]; // Token amounts
-  const hardcodedMinMintAmount = "382080610"; // Min mint amount (for slippage)
-  const hardcodedUseEth = true; // Use ETH or not
-  const handleAddLiquidity = () => {
-    addLiquidity(
-      hardcodedAmounts.map(ethers.toBigInt),
-      ethers.toBigInt(hardcodedMinMintAmount),
-      hardcodedUseEth
-    );
-  };
-  const parsedData = parseJSON(text);
-  // const contracts = [
-  //   {
-  //     address: mintContractAddress,
-  //     abi: mintABI,
-  //     functionName: "add_liquidity",
-  //     args: [[[8122411380, 0].map(amount => ethers.toBigInt(amount)), 0], ethers.toBigInt(382080610), true],
-  //   },
-  // ] as unknown as ContractFunctionParameters[];
+// ✅ Component to render Optimized Yield Data
+const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
+  data,
+}) => (
+  <div className="bg-blue-50 p-4 rounded-lg shadow-md border border-blue-300">
+    <h3 className="text-xl font-semibold text-blue-900">
+      🔄 Optimized Yield Overview
+    </h3>
 
+    <div className="mt-4">
+      <table className="min-w-full border-collapse border border-blue-500 text-left">
+        <thead>
+          <tr className="bg-blue-200">
+            <th className="border p-3">Category</th>
+            <th className="border p-3">Before</th>
+            <th className="border p-3">After</th>
+            <th className="border p-3">Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.keys(data.before).map((key) => (
+            <tr key={key} className="border">
+              <td className="p-3 border font-semibold">{key}</td>
+              <td className="p-3 border">{data.before[key].toFixed(6)}</td>
+              <td className="p-3 border">{data.after[key].toFixed(6)}</td>
+              <td
+                className={`p-3 border font-semibold ${
+                  data.change[key] < 0 ? "text-red-600" : "text-green-600"
+                }`}
+              >
+                {data.change[key].toFixed(6)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p className="text-lg mt-4 font-bold text-blue-900">
+      🌟 Total Optimized Yield:{" "}
+      <span className="text-green-600">
+        {data.total_optimized_yield.toFixed(6)}
+      </span>
+    </p>
+  </div>
+);
+
+// ✅ Main Message Component
+const Message: React.FC<MessageProps> = ({ sender, text }) => {
+  console.log(text);
+  const { walletAddress, addLiquidity, approveSpender } = useWeb3();
+
+  // ✅ Hardcoded values for addLiquidity
+  const hardcodedAmounts = [BigInt("10000000"), BigInt("0")]; // 0.00000001 ETH in wei
+  const hardcodedMinMintAmount = BigInt("10000000"); // Min mint amount (same small value)
+  const hardcodedUseEth = true;
+
+  const handleAddLiquidity = () => {
+    addLiquidity(hardcodedAmounts, hardcodedMinMintAmount, hardcodedUseEth);
+  };
+
+  const parsedResponse = parseJSON(text);
   let messageContent;
 
-  // 🛠️ Check the type of message and render accordingly
-  if (parsedData) {
-    messageContent = <LiquidityMessage data={parsedData} />;
+  if (parsedResponse) {
+    if (parsedResponse.type === "liquidity") {
+      messageContent = <LiquidityMessage data={parsedResponse.data} />;
+    } else if (parsedResponse.type === "yield") {
+      messageContent = <OptimizedYieldMessage data={parsedResponse.data} />;
+    }
   } else {
     messageContent = <TextMessage text={text} />;
   }
@@ -160,25 +202,19 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
         }`}
       >
         {messageContent}
-        {/* <Transaction
-          contracts={contracts}
-          className="w-[450px]"
-          chainId={8453}
-          onError={() => {}}
-          onSuccess={() => {}}
-        >
-          <TransactionButton className="mt-0 mr-auto ml-auto w-[450px] max-w-full text-[white]" />
-          <TransactionStatus>
-            <TransactionStatusLabel />
-            <TransactionStatusAction />
-          </TransactionStatus>
-        </Transaction> */}
-        {sender == "Bot" && (
+
+        {sender === "Bot" && (
+          // <button
+          //   onClick={handleAddLiquidity}
+          //   className="mt-4 bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
+          // >
+          //   Add Liquidity
+          // </button>
           <button
-            onClick={handleAddLiquidity}
-            className="mt-4 bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
+            onClick={approveSpender}
+            className="mt-4 bg-purple-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
           >
-            Add Liquidity
+            Approve Spender
           </button>
         )}
       </div>

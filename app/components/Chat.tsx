@@ -14,6 +14,11 @@ const Chat: React.FC = () => {
     return response.includes("The pool balances for the address");
   };
 
+  const check_yield_opt_in_response = (response: string): boolean => {
+    // Regular expressions to match the required format
+    return (response.includes("before") && response.includes("after") || response.includes("Before"));
+  };
+
   const [messages, setMessages] = useState<Message[]>([]);
 
   const sendMessage = async (message: string) => {
@@ -27,6 +32,11 @@ const Chat: React.FC = () => {
       if (check_pool_balances_in_response(res.data.response)) {
         text = res.data.tool_response;
       }
+
+      if (check_yield_opt_in_response(res.data.tool_response)) {
+        text = res.data.tool_response;
+      }
+
       setMessages((prev) => [...prev, { sender: "Bot", text: text }]);
     } catch (error) {
       console.error("Error:", error);
@@ -39,7 +49,9 @@ const Chat: React.FC = () => {
 
   return (
     <div className="w-3/4 flex flex-col bg-white rounded-extra-rounded ml-20 m-4 p-4 relative shadow-2xl border-2 border-green-200">
-      <h1 className="text-3xl font-semibold text-gray-900 pl-7 pt-2">Chimera-X</h1>
+      <h1 className="text-3xl font-semibold text-gray-900 pl-7 pt-2">
+        Chimera-X
+      </h1>
       <div className="flex-1 overflow-y-auto p-4 space-y-4 mt-7 custom-scrollbar">
         {messages.map((msg, index) => (
           <Message key={index} sender={msg.sender} text={msg.text} />
