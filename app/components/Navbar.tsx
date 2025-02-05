@@ -7,6 +7,7 @@ import {
   useAddress,
 } from "@coinbase/onchainkit/identity";
 import { WalletDefault } from "@coinbase/onchainkit/wallet";
+import { Wallet } from "lucide-react";
 import React from "react";
 import { useAccount } from "wagmi";
 
@@ -41,7 +42,7 @@ const Navbar: React.FC = () => {
           schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
           className="bg-white text-gray-800 font-medium"
         >
-          <Name className="text-black">
+          <Name className="text-black" address={address}>
             <Badge />
           </Name>
           <Address />
