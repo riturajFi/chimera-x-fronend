@@ -100,57 +100,92 @@ const LiquidityMessage: React.FC<{ data: LiquidityBalanceData }> = ({
   </div>
 );
 
-// ✅ Component to render Optimized Yield Data
 const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
   data,
-}) => (
-  <div className="bg-blue-50 p-4 rounded-lg shadow-md border border-blue-300">
-    <h3 className="text-xl font-semibold text-blue-900">
-      🔄 Optimized Yield Overview
-    </h3>
+}) => {
+  const { approveSpender, addLiquidity4Pool, withdraw4Pool } = useWeb3();
 
-    <div className="mt-4">
-      <table className="min-w-full border-collapse border border-blue-500 text-left">
-        <thead>
-          <tr className="bg-blue-200">
-            <th className="border p-3">Category</th>
-            <th className="border p-3">Before</th>
-            <th className="border p-3">After</th>
-            <th className="border p-3">Change</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.keys(data.before).map((key) => (
-            <tr key={key} className="border">
-              <td className="p-3 border font-semibold">{key}</td>
-              <td className="p-3 border">{data.before[key].toFixed(6)}</td>
-              <td className="p-3 border">{data.after[key].toFixed(6)}</td>
-              <td
-                className={`p-3 border font-semibold ${
-                  data.change[key] < 0 ? "text-red-600" : "text-green-600"
-                }`}
-              >
-                {data.change[key].toFixed(6)}
-              </td>
+  return (
+    <div className="bg-blue-50 p-4 rounded-lg shadow-md border border-blue-300">
+      <h3 className="text-xl font-semibold text-blue-900">
+        🔄 Optimized Yield Overview
+      </h3>
+
+      <div className="mt-4">
+        <table className="min-w-full border-collapse border border-blue-500 text-left">
+          <thead>
+            <tr className="bg-blue-200">
+              <th className="border p-3">Category</th>
+              <th className="border p-3">Before</th>
+              <th className="border p-3">After</th>
+              <th className="border p-3">Change</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {Object.keys(data.before).map((key) => (
+              <tr key={key} className="border">
+                <td className="p-3 border font-semibold">{key}</td>
+                <td className="p-3 border">{data.before[key].toFixed(6)}</td>
+                <td className="p-3 border">{data.after[key].toFixed(6)}</td>
+                <td
+                  className={`p-3 border font-semibold ${
+                    data.change[key] < 0 ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {data.change[key].toFixed(6)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-    <p className="text-lg mt-4 font-bold text-blue-900">
-      🌟 Total Optimized Yield:{" "}
-      <span className="text-green-600">
-        {data.total_optimized_yield.toFixed(6)}
-      </span>
-    </p>
-  </div>
-);
+      <p className="text-lg mt-4 font-bold text-blue-900">
+        🌟 Total Optimized Yield:{" "}
+        <span className="text-green-600">
+          {data.total_optimized_yield.toFixed(6)}
+        </span>
+      </p>
+
+      {/* ✅ Conditional Buttons for Curve */}
+      {data.change["curve"] < 0 ? (
+        <button
+          onClick={withdraw4Pool}
+          className="mt-4 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
+        >
+          Withdraw
+        </button>
+      ) : (
+        <div className="flex items-center space-x-4 mt-4">
+          <button
+            onClick={approveSpender}
+            className="bg-yellow-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
+          >
+            Authorize
+          </button>
+          <span className="text-lg font-bold">➡️</span>
+          <button
+            onClick={addLiquidity4Pool}
+            className="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
+          >
+            Add Liquidity 4 Pool
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ✅ Main Message Component
 const Message: React.FC<MessageProps> = ({ sender, text }) => {
   console.log(text);
-  const { walletAddress, addLiquidity, approveSpender, addLiquidity4Pool, withdraw4Pool } = useWeb3();
+  const {
+    walletAddress,
+    addLiquidity,
+    approveSpender,
+    addLiquidity4Pool,
+    withdraw4Pool,
+  } = useWeb3();
 
   // ✅ Hardcoded values for addLiquidity
   const hardcodedAmounts = [BigInt("10000000"), BigInt("0")]; // 0.00000001 ETH in wei

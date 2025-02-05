@@ -163,9 +163,9 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
       const contract = new ethers.Contract(_4pool_deposit_contract_proxy_address, _4POOL_DEPOSIT_ABI, signer);
 
       // ✅ Hardcoded Values
-      const _burn_amount = BigInt("45000000000000000"); // 0.045 ETH in wei
+      const _burn_amount = BigInt("2521159640395019"); // 0.045 ETH in wei
       const i = 0; // Index of the token
-      const _min_received = BigInt(45659); // Minimum tokens received
+      const _min_received = BigInt(2557); // Minimum tokens received
 
       // ✅ Call `remove_liquidity_one_coin`
       const tx = await contract.remove_liquidity_one_coin(_burn_amount, i, _min_received);
