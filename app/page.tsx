@@ -6,16 +6,20 @@ import LandingPage from "./pages/LandingPage";
 import { Web3Provider } from "./context/Web3Context";
 import TransactPage from "./pages/TransactPage";
 const Page: React.FC = () => {
-  // return <ChatPage/>
   return (
     <Web3Provider>
-      {/* Landing Page: Connect wallet */}
-      <LandingPage />
-
-      {/* Transact Page: Send ETH after connecting */}
-      <TransactPage />
+      <ChatPage />
     </Web3Provider>
   );
+  // return (
+  //   <Web3Provider>
+  //     {/* Landing Page: Connect wallet */}
+  //     <LandingPage />
+
+  //     {/* Transact Page: Send ETH after connecting */}
+  //     <TransactPage />
+  //   </Web3Provider>
+  // );
 };
 
 export default Page;

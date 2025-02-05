@@ -6,9 +6,15 @@ import {
   TransactionStatusAction,
   TransactionStatusLabel,
 } from "@coinbase/onchainkit/transaction";
-import React from "react";
-import { mintABI, mintContractAddress, BASE_SEPOLIA_CHAIN_ID } from "./consants";
+import React, { useState } from "react";
+import {
+  mintABI,
+  mintContractAddress,
+  BASE_SEPOLIA_CHAIN_ID,
+} from "./consants";
 import { ContractFunctionParameters } from "viem";
+import { useWeb3 } from "../context/Web3Context";
+import { ethers } from "ethers";
 
 // Define the Message interface
 interface MessageProps {
@@ -96,15 +102,26 @@ const LiquidityMessage: React.FC<{ data: LiquidityBalanceData }> = ({
 
 // ✅ Main Message Component (Organized & Extendable)
 const Message: React.FC<MessageProps> = ({ sender, text }) => {
+  const { walletAddress, addLiquidity } = useWeb3();
+  const hardcodedAmounts = ["8122411380", "0"]; // Token amounts
+  const hardcodedMinMintAmount = "382080610"; // Min mint amount (for slippage)
+  const hardcodedUseEth = true; // Use ETH or not
+  const handleAddLiquidity = () => {
+    addLiquidity(
+      hardcodedAmounts.map(ethers.toBigInt),
+      ethers.toBigInt(hardcodedMinMintAmount),
+      hardcodedUseEth
+    );
+  };
   const parsedData = parseJSON(text);
-  const contracts = [
-    {
-      address: mintContractAddress,
-      abi: mintABI,
-      functionName: "mint",
-      args: ["0xcE674EED84af71CFb5540d764fF5047a183eaA9d"],
-    },
-  ] as unknown as ContractFunctionParameters[];
+  // const contracts = [
+  //   {
+  //     address: mintContractAddress,
+  //     abi: mintABI,
+  //     functionName: "add_liquidity",
+  //     args: [[[8122411380, 0].map(amount => ethers.toBigInt(amount)), 0], ethers.toBigInt(382080610), true],
+  //   },
+  // ] as unknown as ContractFunctionParameters[];
 
   let messageContent;
 
@@ -142,11 +159,11 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
           sender === "Bot" ? "bg-green-200 py-6 px-10" : "bg-white"
         }`}
       >
-        {/* {messageContent} */}
-        <Transaction
+        {messageContent}
+        {/* <Transaction
           contracts={contracts}
           className="w-[450px]"
-          chainId={BASE_SEPOLIA_CHAIN_ID}
+          chainId={8453}
           onError={() => {}}
           onSuccess={() => {}}
         >
@@ -155,7 +172,15 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
             <TransactionStatusLabel />
             <TransactionStatusAction />
           </TransactionStatus>
-        </Transaction>
+        </Transaction> */}
+        {sender == "Bot" && (
+          <button
+            onClick={handleAddLiquidity}
+            className="mt-4 bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
+          >
+            Add Liquidity
+          </button>
+        )}
       </div>
     </div>
   );
