@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ethers } from "ethers";
 import { CURVE_CONTRACT_ABI } from "../constants/curve_abi";
 import { USDC_BASE_CONTRACT_ABI } from "../constants/USDC_Base_Abi";
-import { USDC_contract_proxy_address } from "../constants/contract_addresses";
+import { USDC_contract_proxy_address, _4pool_deposit_contract_proxy_address } from "../constants/contract_addresses";
+import {_4POOL_DEPOSIT_ABI} from "../constants/4pool_deposit_abi"
 
 // Curve Smart Contract Information
 const CURVE_CONTRACT_ADDRESS = "0x11C1fBd4b3De66bC0565779b35171a6CF3E71f59";
@@ -17,6 +18,8 @@ interface Web3ContextType {
     useEth: boolean
   ) => Promise<void>;
   approveSpender: () => Promise<void>;
+  addLiquidity4Pool: () => Promise<void>;
+  withdraw4Pool: () => Promise<void>;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -122,9 +125,62 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const addLiquidity4Pool = async () => {
+    if (!window.ethereum || !walletAddress) {
+      alert("Please connect your MetaMask wallet first.");
+      return;
+    }
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(_4pool_deposit_contract_proxy_address, _4POOL_DEPOSIT_ABI, signer);
+
+      // ✅ Hardcoded Values
+      const _amounts = [BigInt(50000), BigInt(0), BigInt(0), BigInt(0)];
+      const _min_mint_amount = BigInt("49242745402084618");
+
+      // ✅ Call `add_liquidity` function
+      const tx = await contract.add_liquidity(_amounts, _min_mint_amount);
+      alert(`Transaction Sent! Tx Hash: ${tx.hash}`);
+
+      await tx.wait();
+      alert("Liquidity Added Successfully!");
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
+  };
+
+  const withdraw4Pool = async () => {
+    if (!window.ethereum || !walletAddress) {
+      alert("Please connect your MetaMask wallet first.");
+      return;
+    }
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(_4pool_deposit_contract_proxy_address, _4POOL_DEPOSIT_ABI, signer);
+
+      // ✅ Hardcoded Values
+      const _burn_amount = BigInt("45000000000000000"); // 0.045 ETH in wei
+      const i = 0; // Index of the token
+      const _min_received = BigInt(45659); // Minimum tokens received
+
+      // ✅ Call `remove_liquidity_one_coin`
+      const tx = await contract.remove_liquidity_one_coin(_burn_amount, i, _min_received);
+      alert(`Transaction Sent! Tx Hash: ${tx.hash}`);
+
+      await tx.wait();
+      alert("Liquidity Removed Successfully!");
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
+  };
+
   return (
     <Web3Context.Provider
-      value={{ walletAddress, connectWallet, addLiquidity, approveSpender }}
+      value={{ walletAddress, connectWallet, addLiquidity, approveSpender, addLiquidity4Pool, withdraw4Pool }}
     >
       {children}
     </Web3Context.Provider>

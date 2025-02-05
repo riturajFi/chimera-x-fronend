@@ -150,7 +150,7 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
 // ✅ Main Message Component
 const Message: React.FC<MessageProps> = ({ sender, text }) => {
   console.log(text);
-  const { walletAddress, addLiquidity, approveSpender } = useWeb3();
+  const { walletAddress, addLiquidity, approveSpender, addLiquidity4Pool, withdraw4Pool } = useWeb3();
 
   // ✅ Hardcoded values for addLiquidity
   const hardcodedAmounts = [BigInt("10000000"), BigInt("0")]; // 0.00000001 ETH in wei
@@ -211,10 +211,10 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
           //   Add Liquidity
           // </button>
           <button
-            onClick={approveSpender}
+            onClick={withdraw4Pool}
             className="mt-4 bg-purple-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
           >
-            Approve Spender
+            Add Liquidity 4 Pool
           </button>
         )}
       </div>
