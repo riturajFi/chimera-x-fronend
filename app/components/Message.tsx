@@ -80,7 +80,9 @@ const LiquidityMessage: React.FC<{ data: LiquidityBalanceData }> = ({
 );
 
 // ✅ Component to render Optimized Yield Data
-const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({ data }) => {
+const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
+  data,
+}) => {
   const { approveSpender, addLiquidity4Pool, withdraw4Pool } = useWeb3();
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
 
@@ -96,7 +98,9 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({ data })
 
   return (
     <div className="bg-blue-50 p-4 rounded-lg shadow-md border border-blue-300">
-      <h3 className="text-xl font-semibold text-blue-900">🔄 Optimized Yield Overview</h3>
+      <h3 className="text-xl font-semibold text-blue-900">
+        🔄 Optimized Yield Overview
+      </h3>
 
       <div className="mt-4">
         <table className="min-w-full border-collapse border border-blue-500 text-left">
@@ -115,7 +119,11 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({ data })
                 <td className="p-3 border font-semibold">{key}</td>
                 <td className="p-3 border">{data.before[key].toFixed(6)}</td>
                 <td className="p-3 border">{data.after[key].toFixed(6)}</td>
-                <td className={`p-3 border font-semibold ${data.change[key] < 0 ? "text-red-600" : "text-green-600"}`}>
+                <td
+                  className={`p-3 border font-semibold ${
+                    data.change[key] < 0 ? "text-red-600" : "text-green-600"
+                  }`}
+                >
                   {data.change[key] > 0 ? "+" : ""}
                   {data.change[key].toFixed(6)}
                 </td>
@@ -139,7 +147,11 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({ data })
                       <button
                         onClick={addLiquidity4Pool}
                         disabled={!isAuthorized}
-                        className={`px-4 py-2 rounded shadow transition w-full ${isAuthorized ? "bg-green-500 text-white hover:scale-105" : "bg-gray-400 text-gray-200 cursor-not-allowed"}`}
+                        className={`px-4 py-2 rounded shadow transition w-full ${
+                          isAuthorized
+                            ? "bg-green-500 text-white hover:scale-105"
+                            : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                        }`}
                       >
                         Add Liquidity
                       </button>
@@ -177,7 +189,10 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
 
   const parsedResponse = parseJSON(text);
   let messageContent;
-  console.log(text);
+
+  if (text.includes("approve") && text.includes("USDC")) {
+  }
+
   if (parsedResponse) {
     if (parsedResponse.type === "liquidity") {
       messageContent = <LiquidityMessage data={parsedResponse.data} />;
@@ -217,19 +232,13 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
       >
         {messageContent}
 
-        {sender === "Bot" && (
-          // <button
-          //   onClick={handleAddLiquidity}
-          //   className="mt-4 bg-blue-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
-          // >
-          //   Add Liquidity
-          // </button>
-          <button
-            onClick={withdraw4Pool}
-            className="mt-4 bg-purple-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
-          >
-            Add Liquidity 4 Pool
-          </button>
+        {/* Approve Button (Only shown when 'approve' and 'USDC' are in text) */}
+        {text.includes("approve") && text.includes("USDC") && (
+          <div className="mt-4 flex justify-start">
+            <button className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+              Approve
+            </button>
+          </div>
         )}
       </div>
     </div>

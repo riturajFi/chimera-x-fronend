@@ -2,8 +2,11 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ethers } from "ethers";
 import { CURVE_CONTRACT_ABI } from "../constants/curve_abi";
 import { USDC_BASE_CONTRACT_ABI } from "../constants/USDC_base_abi";
-import { USDC_contract_proxy_address, _4pool_deposit_contract_proxy_address } from "../constants/contract_addresses";
-import {_4POOL_DEPOSIT_ABI} from "../constants/4pool_deposit_abi"
+import {
+  USDC_contract_proxy_address,
+  _4pool_deposit_contract_proxy_address,
+} from "../constants/contract_addresses";
+import { _4POOL_DEPOSIT_ABI } from "../constants/4pool_deposit_abi";
 
 // Curve Smart Contract Information
 const CURVE_CONTRACT_ADDRESS = "0x11C1fBd4b3De66bC0565779b35171a6CF3E71f59";
@@ -20,6 +23,7 @@ interface Web3ContextType {
   approveSpender: () => Promise<void>;
   addLiquidity4Pool: () => Promise<void>;
   withdraw4Pool: () => Promise<void>;
+  approveSpender1: () => Promise<void>;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -134,7 +138,11 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new ethers.Contract(_4pool_deposit_contract_proxy_address, _4POOL_DEPOSIT_ABI, signer);
+      const contract = new ethers.Contract(
+        _4pool_deposit_contract_proxy_address,
+        _4POOL_DEPOSIT_ABI,
+        signer
+      );
 
       // ✅ Hardcoded Values
       const _amounts = [BigInt(50000), BigInt(0), BigInt(0), BigInt(0)];
@@ -160,7 +168,11 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new ethers.Contract(_4pool_deposit_contract_proxy_address, _4POOL_DEPOSIT_ABI, signer);
+      const contract = new ethers.Contract(
+        _4pool_deposit_contract_proxy_address,
+        _4POOL_DEPOSIT_ABI,
+        signer
+      );
 
       // ✅ Hardcoded Values
       const _burn_amount = BigInt("2521159640395019"); // 0.045 ETH in wei
@@ -168,7 +180,11 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
       const _min_received = BigInt(2557); // Minimum tokens received
 
       // ✅ Call `remove_liquidity_one_coin`
-      const tx = await contract.remove_liquidity_one_coin(_burn_amount, i, _min_received);
+      const tx = await contract.remove_liquidity_one_coin(
+        _burn_amount,
+        i,
+        _min_received
+      );
       alert(`Transaction Sent! Tx Hash: ${tx.hash}`);
 
       await tx.wait();
@@ -178,9 +194,49 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const approveSpender1 = async () => {
+    if (!window.ethereum || !walletAddress) {
+      alert("Please connect your MetaMask wallet first.");
+      return;
+    }
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        USDC_contract_proxy_address,
+        USDC_BASE_CONTRACT_ABI,
+        signer
+      );
+
+      // Hardcoded values
+      const spender = "0xbAE7EEa4933AD5FE5A9976f4ba89A01E85c4AB8D";
+      const value = BigInt(
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      );
+
+      // ✅ Call approve function
+      const tx = await contract.approve(spender, value);
+      alert(`Transaction Sent! Tx Hash: ${tx.hash}`);
+
+      await tx.wait();
+      alert("Approval Successful!");
+    } catch (error) {
+      console.error("Approval failed:", error);
+    }
+  };
+
   return (
     <Web3Context.Provider
-      value={{ walletAddress, connectWallet, addLiquidity, approveSpender, addLiquidity4Pool, withdraw4Pool }}
+      value={{
+        walletAddress,
+        connectWallet,
+        addLiquidity,
+        approveSpender,
+        addLiquidity4Pool,
+        withdraw4Pool,
+        approveSpender1,
+      }}
     >
       {children}
     </Web3Context.Provider>
