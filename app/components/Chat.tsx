@@ -11,7 +11,7 @@ interface Message {
 const Chat: React.FC = () => {
   const check_pool_balances_in_response = (response: string): boolean => {
     // Regular expressions to match the required format
-    return response.includes("The pool balances for the address");
+    return response.includes("4Pool");
   };
 
   const check_yield_opt_in_response = (response: string): boolean => {

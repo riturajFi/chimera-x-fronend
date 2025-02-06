@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { ethers } from "ethers";
 import { CURVE_CONTRACT_ABI } from "../constants/curve_abi";
-import { USDC_BASE_CONTRACT_ABI } from "../constants/USDC_Base_Abi";
+import { USDC_BASE_CONTRACT_ABI } from "../constants/USDC_base_abi";
 import { USDC_contract_proxy_address, _4pool_deposit_contract_proxy_address } from "../constants/contract_addresses";
 import {_4POOL_DEPOSIT_ABI} from "../constants/4pool_deposit_abi"
 

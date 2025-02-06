@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useWeb3 } from "../context/Web3Context";
 import { ethers } from "ethers";
 
@@ -10,14 +10,7 @@ interface MessageProps {
 
 // ✅ Define Liquidity Balance Data Structure
 interface LiquidityBalanceData {
-  [category: string]: {
-    chain_name: string;
-    balance: string;
-    contract_name: string;
-    contract_ticker_symbol: string;
-    quote_currency: string;
-    quote: number;
-  }[];
+  [poolName: string]: number;
 }
 
 // ✅ Define Optimized Yield Data Structure
@@ -56,45 +49,27 @@ const TextMessage: React.FC<{ text: string }> = ({ text }) => (
 const LiquidityMessage: React.FC<{ data: LiquidityBalanceData }> = ({
   data,
 }) => (
-  <div className="bg-white/70 backdrop-blur-lg p-3 rounded-lg shadow-inner">
-    {Object.keys(data).map((category) => (
-      <div key={category} className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 capitalize bg-gray-200 px-4 py-2 rounded-md shadow-md">
-          {category}
+  <div className="bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-inner relative">
+    {/* Curve Finance Logo */}
+    <div className="flex justify-center mb-2">
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwhSJnujc9BvUhq1rk17b5pUzGelz8OKx2Mw&s"
+        alt="Curve Finance Logo"
+        className="h-12"
+      />
+    </div>
+
+    {Object.keys(data).map((pool) => (
+      <div
+        key={pool}
+        className="mb-3 border border-gray-300 rounded-md p-3 shadow-md"
+      >
+        <h3 className="text-lg font-semibold text-gray-900 capitalize bg-gray-200 px-4 py-2 rounded-md">
+          {pool}
         </h3>
-        <div className="border border-gray-300 rounded-md mt-2 overflow-hidden shadow-lg">
-          <table className="min-w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gradient-to-r from-gray-200 to-gray-100 text-gray-900">
-                <th className="p-3 border border-gray-400">🔗 Chain</th>
-                <th className="p-3 border border-gray-400">💎 Asset</th>
-                <th className="p-3 border border-gray-400">📊 Balance</th>
-                <th className="p-3 border border-gray-400">💰 Quote (USD)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data[category].map((item, index) => (
-                <tr
-                  key={index}
-                  className="border-t text-gray-800 hover:bg-gray-100 transition duration-300"
-                >
-                  <td className="p-3 border border-gray-300">
-                    {item.chain_name}
-                  </td>
-                  <td className="p-3 border border-gray-300 font-semibold">
-                    {item.contract_ticker_symbol}
-                  </td>
-                  <td className="p-3 border border-gray-300 text-blue-600 font-medium">
-                    {parseFloat(item.balance).toFixed(2)}
-                  </td>
-                  <td className="p-3 border border-gray-300 text-green-600 font-semibold">
-                    ${item.quote.toFixed(6)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <p className="text-blue-600 text-lg font-medium mt-2">
+          Balance: {data[pool].toFixed(6)}
+        </p>
       </div>
     ))}
   </div>
@@ -104,6 +79,18 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
   data,
 }) => {
   const { approveSpender, addLiquidity4Pool, withdraw4Pool } = useWeb3();
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false); // ✅ Tracks authorization status
+
+  // ✅ Handle Authorization with state update
+  const handleAuthorize = async () => {
+    try {
+      await approveSpender();
+      setIsAuthorized(true); // Enable Add Liquidity button on success
+    } catch (error) {
+      setIsAuthorized(false); // Keep Add Liquidity disabled on failure
+      console.error("Authorization failed:", error);
+    }
+  };
 
   return (
     <div className="bg-blue-50 p-4 rounded-lg shadow-md border border-blue-300">
@@ -131,7 +118,8 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
                   className={`p-3 border font-semibold ${
                     data.change[key] < 0 ? "text-red-600" : "text-green-600"
                   }`}
-                >
+                > 
+                  {data.change[key] > 0 ? "+" : ""}
                   {data.change[key].toFixed(6)}
                 </td>
               </tr>
@@ -157,16 +145,26 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
         </button>
       ) : (
         <div className="flex items-center space-x-4 mt-4">
+          {/* ✅ Authorize Button */}
           <button
-            onClick={approveSpender}
-            className="bg-yellow-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
+            onClick={handleAuthorize}
+            className={`bg-yellow-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition ${
+              isAuthorized ? "opacity-100" : "opacity-100"
+            }`}
           >
             Authorize
           </button>
           <span className="text-lg font-bold">➡️</span>
+
+          {/* ✅ Add Liquidity Button (Disabled until authorized) */}
           <button
             onClick={addLiquidity4Pool}
-            className="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
+            disabled={!isAuthorized} // ✅ Button disabled until authorize is successful
+            className={`px-6 py-3 rounded-full shadow-lg transition ${
+              isAuthorized
+                ? "bg-green-500 text-white hover:scale-105"
+                : "bg-gray-400 text-gray-200 cursor-not-allowed"
+            }`}
           >
             Add Liquidity 4 Pool
           </button>
@@ -187,7 +185,6 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
     withdraw4Pool,
   } = useWeb3();
 
-  // ✅ Hardcoded values for addLiquidity
   const hardcodedAmounts = [BigInt("10000000"), BigInt("0")]; // 0.00000001 ETH in wei
   const hardcodedMinMintAmount = BigInt("10000000"); // Min mint amount (same small value)
   const hardcodedUseEth = true;
