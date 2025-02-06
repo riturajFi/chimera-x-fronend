@@ -75,28 +75,23 @@ const LiquidityMessage: React.FC<{ data: LiquidityBalanceData }> = ({
   </div>
 );
 
-const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
-  data,
-}) => {
+const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({ data }) => {
   const { approveSpender, addLiquidity4Pool, withdraw4Pool } = useWeb3();
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(false); // ✅ Tracks authorization status
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
 
-  // ✅ Handle Authorization with state update
   const handleAuthorize = async () => {
     try {
       await approveSpender();
-      setIsAuthorized(true); // Enable Add Liquidity button on success
+      setIsAuthorized(true);
     } catch (error) {
-      setIsAuthorized(false); // Keep Add Liquidity disabled on failure
+      setIsAuthorized(false);
       console.error("Authorization failed:", error);
     }
   };
 
   return (
     <div className="bg-blue-50 p-4 rounded-lg shadow-md border border-blue-300">
-      <h3 className="text-xl font-semibold text-blue-900">
-        🔄 Optimized Yield Overview
-      </h3>
+      <h3 className="text-xl font-semibold text-blue-900">🔄 Optimized Yield Overview</h3>
 
       <div className="mt-4">
         <table className="min-w-full border-collapse border border-blue-500 text-left">
@@ -106,6 +101,7 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
               <th className="border p-3">Before</th>
               <th className="border p-3">After</th>
               <th className="border p-3">Change</th>
+              <th className="border p-3">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -114,62 +110,43 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
                 <td className="p-3 border font-semibold">{key}</td>
                 <td className="p-3 border">{data.before[key].toFixed(6)}</td>
                 <td className="p-3 border">{data.after[key].toFixed(6)}</td>
-                <td
-                  className={`p-3 border font-semibold ${
-                    data.change[key] < 0 ? "text-red-600" : "text-green-600"
-                  }`}
-                > 
+                <td className={`p-3 border font-semibold ${data.change[key] < 0 ? "text-red-600" : "text-green-600"}`}>
                   {data.change[key] > 0 ? "+" : ""}
                   {data.change[key].toFixed(6)}
+                </td>
+                <td className="p-3 border">
+                  {data.change[key] < 0 ? (
+                    <button
+                      onClick={withdraw4Pool}
+                      className="bg-red-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition"
+                    >
+                      Withdraw
+                    </button>
+                  ) : data.change[key] > 0 ? (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={handleAuthorize}
+                        className={`bg-yellow-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition ${isAuthorized ? "opacity-100" : "opacity-100"}`}
+                      >
+                        Authorize
+                      </button>
+                      <button
+                        onClick={addLiquidity4Pool}
+                        disabled={!isAuthorized}
+                        className={`px-4 py-2 rounded shadow transition ${isAuthorized ? "bg-green-500 text-white hover:scale-105" : "bg-gray-400 text-gray-200 cursor-not-allowed"}`}
+                      >
+                        Add Liquidity
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-gray-500">No Action Needed</span>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <p className="text-lg mt-4 font-bold text-blue-900">
-        🌟 Total Optimized Yield:{" "}
-        <span className="text-green-600">
-          {data.total_optimized_yield.toFixed(6)}
-        </span>
-      </p>
-
-      {/* ✅ Conditional Buttons for Curve */}
-      {data.change["curve"] < 0 ? (
-        <button
-          onClick={withdraw4Pool}
-          className="mt-4 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
-        >
-          Withdraw
-        </button>
-      ) : (
-        <div className="flex items-center space-x-4 mt-4">
-          {/* ✅ Authorize Button */}
-          <button
-            onClick={handleAuthorize}
-            className={`bg-yellow-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition ${
-              isAuthorized ? "opacity-100" : "opacity-100"
-            }`}
-          >
-            Authorize
-          </button>
-          <span className="text-lg font-bold">➡️</span>
-
-          {/* ✅ Add Liquidity Button (Disabled until authorized) */}
-          <button
-            onClick={addLiquidity4Pool}
-            disabled={!isAuthorized} // ✅ Button disabled until authorize is successful
-            className={`px-6 py-3 rounded-full shadow-lg transition ${
-              isAuthorized
-                ? "bg-green-500 text-white hover:scale-105"
-                : "bg-gray-400 text-gray-200 cursor-not-allowed"
-            }`}
-          >
-            Add Liquidity 4 Pool
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -194,7 +171,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
 
   const parsedResponse = parseJSON(text);
   let messageContent;
-  console.log(parsedResponse)
+  console.log(text)
   if (parsedResponse) {
     if (parsedResponse.type === "liquidity") {
       messageContent = <LiquidityMessage data={parsedResponse.data} />;
