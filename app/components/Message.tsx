@@ -28,7 +28,7 @@ const parseJSON = (
   try {
     const data = JSON.parse(text);
     if (typeof data === "object" && data !== null) {
-      if ("curve" in data || "aave" in data || "lido" in data) {
+      if ("4Pool" in data || "USDC/USDM" in data || "USDC/MONEY Curve LP" in data) {
         return { type: "liquidity", data: data as LiquidityBalanceData };
       } else if ("before" in data && "after" in data && "change" in data) {
         return { type: "yield", data: data as OptimizedYieldData };
@@ -176,7 +176,6 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
 
 // ✅ Main Message Component
 const Message: React.FC<MessageProps> = ({ sender, text }) => {
-  console.log(text);
   const {
     walletAddress,
     addLiquidity,
@@ -195,7 +194,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
 
   const parsedResponse = parseJSON(text);
   let messageContent;
-
+  console.log(parsedResponse)
   if (parsedResponse) {
     if (parsedResponse.type === "liquidity") {
       messageContent = <LiquidityMessage data={parsedResponse.data} />;
