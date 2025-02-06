@@ -28,7 +28,11 @@ const parseJSON = (
   try {
     const data = JSON.parse(text);
     if (typeof data === "object" && data !== null) {
-      if ("4Pool" in data || "USDC/USDM" in data || "USDC/MONEY Curve LP" in data) {
+      if (
+        "4Pool" in data ||
+        "USDC/USDM" in data ||
+        "USDC/MONEY Curve LP" in data
+      ) {
         return { type: "liquidity", data: data as LiquidityBalanceData };
       } else if ("before" in data && "after" in data && "change" in data) {
         return { type: "yield", data: data as OptimizedYieldData };
@@ -75,6 +79,7 @@ const LiquidityMessage: React.FC<{ data: LiquidityBalanceData }> = ({
   </div>
 );
 
+// ✅ Component to render Optimized Yield Data
 const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({ data }) => {
   const { approveSpender, addLiquidity4Pool, withdraw4Pool } = useWeb3();
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
@@ -118,22 +123,23 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({ data })
                   {data.change[key] < 0 ? (
                     <button
                       onClick={withdraw4Pool}
-                      className="bg-red-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition"
+                      className="bg-red-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition w-full"
                     >
                       Withdraw
                     </button>
                   ) : data.change[key] > 0 ? (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-col items-center space-y-2 w-full">
                       <button
                         onClick={handleAuthorize}
-                        className={`bg-yellow-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition ${isAuthorized ? "opacity-100" : "opacity-100"}`}
+                        className="bg-yellow-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition w-full"
                       >
                         Authorize
                       </button>
+                      <span className="text-lg">⬇️</span>
                       <button
                         onClick={addLiquidity4Pool}
                         disabled={!isAuthorized}
-                        className={`px-4 py-2 rounded shadow transition ${isAuthorized ? "bg-green-500 text-white hover:scale-105" : "bg-gray-400 text-gray-200 cursor-not-allowed"}`}
+                        className={`px-4 py-2 rounded shadow transition w-full ${isAuthorized ? "bg-green-500 text-white hover:scale-105" : "bg-gray-400 text-gray-200 cursor-not-allowed"}`}
                       >
                         Add Liquidity
                       </button>
@@ -171,7 +177,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
 
   const parsedResponse = parseJSON(text);
   let messageContent;
-  console.log(text)
+  console.log(text);
   if (parsedResponse) {
     if (parsedResponse.type === "liquidity") {
       messageContent = <LiquidityMessage data={parsedResponse.data} />;
