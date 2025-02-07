@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useWeb3 } from "../context/Web3Context";
 import { ethers } from "ethers";
+import { TransactionDefault } from "@coinbase/onchainkit/transaction";
+import { encodeFunctionData } from "viem";
 
 // ✅ Define Message Props
 interface MessageProps {
@@ -177,12 +179,39 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
     approveSpender,
     addLiquidity4Pool,
     withdraw4Pool,
-    approveSpender1
+    approveSpender1,
   } = useWeb3();
 
   const hardcodedAmounts = [BigInt("10000000"), BigInt("0")]; // 0.00000001 ETH in wei
   const hardcodedMinMintAmount = BigInt("10000000"); // Min mint amount (same small value)
   const hardcodedUseEth = true;
+
+  const USDC_CONTRACT_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+  const SPENDER_ADDRESS = "0xf6C5F01C7F3148891ad0e19DF78743D31E390D1f";
+  const MAX_APPROVAL_AMOUNT = BigInt(
+    "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  );
+
+  // ABI for the approve function
+  const approveAbi = [
+    {
+      stateMutability: "nonpayable",
+      type: "function",
+      name: "approve",
+      inputs: [
+        { name: "spender", type: "address" },
+        { name: "value", type: "uint256" },
+      ],
+      outputs: [{ name: "", type: "bool" }],
+    },
+  ];
+
+  // Encode approve function data
+  const encodedApproveData = encodeFunctionData({
+    abi: approveAbi,
+    functionName: "approve",
+    args: [SPENDER_ADDRESS, MAX_APPROVAL_AMOUNT],
+  });
 
   const handleAddLiquidity = () => {
     addLiquidity(hardcodedAmounts, hardcodedMinMintAmount, hardcodedUseEth);
@@ -231,12 +260,24 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
           sender === "Bot" ? "bg-green-200 py-6 px-10" : "bg-white"
         }`}
       >
-        {messageContent}
+        <TransactionDefault
+          chainId={8453}
+          calls={[
+            {
+              to: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              data: encodedApproveData,
+              value: BigInt(0),
+            },
+          ]}
+        />
 
         {/* Approve Button (Only shown when 'approve' and 'USDC' are in text) */}
         {text.includes("approve") && text.includes("USDC") && (
           <div className="mt-4 flex justify-start">
-            <button className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition" onClick={approveSpender1}>
+            <button
+              className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+              onClick={approveSpender1}
+            >
               Approve
             </button>
           </div>

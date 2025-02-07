@@ -3,7 +3,23 @@ import Chat from "../components/Chat";
 import ChatNotificationPanel from "../components/ChatNotificationPanel";
 import { useAccount } from "wagmi";
 import { useWeb3 } from "../context/Web3Context";
-import { Address, Badge, Identity, Name } from "@coinbase/onchainkit/identity";
+import {
+  Address,
+  Avatar,
+  Badge,
+  EthBalance,
+  Identity,
+  Name,
+} from "@coinbase/onchainkit/identity";
+import {
+  ConnectWallet,
+  ConnectWalletText,
+  Wallet,
+  WalletDefault,
+  WalletDropdown,
+  WalletDropdownDisconnect,
+  WalletDropdownLink,
+} from "@coinbase/onchainkit/wallet";
 
 const Navbar: React.FC<{
   setPage: (page: string) => void;
@@ -19,7 +35,6 @@ const Navbar: React.FC<{
           ⚡
         </div>
       </div>
-
       {/* ✅ Navigation Buttons for Page Switching */}
       <nav className="flex space-x-4 bg-white px-4 py-2 rounded-full shadow-lg">
         <button
@@ -67,39 +82,46 @@ const Navbar: React.FC<{
           Tools
         </button>
       </nav>
-
-      {/* ✅ Wallet Connection Status */}
-      {walletAddress ? (
-        <p className="text-green-600 font-bold">
-          ✅ Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-        </p>
-      ) : (
-        <button
-          className="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition"
-          onClick={connectWallet}
-        >
-          Connect Wallet
-        </button>
-      )}
-
       {/* ✅ User Profile */}
-      <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-full shadow-lg">
-        <img
-          src="https://img.freepik.com/premium-photo/cool-man-3d-cartoon-avatar-portrait_839035-196561.jpg"
-          alt="User"
-          className="w-10 h-10 rounded-full"
-        />
-        <Identity
-          address={address}
-          schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
-          className="bg-white text-gray-800 font-medium"
+      
+      <Wallet className="mr-6">
+        <ConnectWallet
+          className={`mt-4 px-6 py-3 rounded-full shadow-lg hover:scale-105 transition text-white ${
+             "bg-gradient-to-r from-blue-500 to-purple-500"
+              
+          }`}
         >
-          <Name className="text-black" address={address}>
-            <Badge />
-          </Name>
-          <Address />
-        </Identity>
-      </div>
+          <ConnectWalletText>Connect Wallet</ConnectWalletText>
+          <img
+            src="https://img.freepik.com/premium-photo/cool-man-3d-cartoon-avatar-portrait_839035-196561.jpg"
+            alt="User"
+            className="w-12 h-12 rounded-full border-4"
+          />
+          <div className="flex flex-col items-start ml-2 mr-4 text-white">
+            <Name className="text-white" />
+            <Address className="text-gray-300"/>
+          </div>
+        </ConnectWallet>
+        <WalletDropdown>
+          <Identity
+            className="px-4 pt-3 pb-2 hover:bg-blue-200"
+            hasCopyAddressOnClick
+          >
+            <Avatar />
+            <Name />
+            <Address />
+            <EthBalance />
+          </Identity>
+          <WalletDropdownLink
+            className="hover:bg-blue-200"
+            icon="wallet"
+            href="https://keys.coinbase.com"
+          >
+            Wallet
+          </WalletDropdownLink>
+          <WalletDropdownDisconnect className="hover:bg-blue-200" />
+        </WalletDropdown>
+      </Wallet>
     </div>
   );
 };

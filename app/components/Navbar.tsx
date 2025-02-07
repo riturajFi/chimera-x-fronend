@@ -6,8 +6,7 @@ import {
   Name,
   useAddress,
 } from "@coinbase/onchainkit/identity";
-import { WalletDefault } from "@coinbase/onchainkit/wallet";
-import { Wallet } from "lucide-react";
+import { WalletDefault, Wallet } from "@coinbase/onchainkit/wallet";
 import React from "react";
 import { useAccount } from "wagmi";
 import { useWeb3 } from "../context/Web3Context";
@@ -32,7 +31,7 @@ const Navbar: React.FC = () => {
         <button className="text-gray-600 px-4 py-2">Templates</button>
         <button className="text-gray-600 px-4 py-2">Tools</button>
       </nav>{" "}
-      {walletAddress ? (
+      {/* {walletAddress ? (
         <p className="text-green-600 font-bold">
           ✅ Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
         </p>
@@ -43,8 +42,10 @@ const Navbar: React.FC = () => {
         >
           Connect Wallet
         </button>
-      )}
-      {/* <WalletDefault/> */}
+      )} */}
+      <Wallet className="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition">
+        Connect Wallet
+      </Wallet>
       <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-full shadow-lg">
         <img
           src="https://img.freepik.com/premium-photo/cool-man-3d-cartoon-avatar-portrait_839035-196561.jpg"

@@ -13,7 +13,9 @@
   },
   "node_modules\\@wagmi\\connectors\\dist\\esm\\metaMask.js -> @metamask/sdk": {
     "id": "node_modules\\@wagmi\\connectors\\dist\\esm\\metaMask.js -> @metamask/sdk",
-    "files": []
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_metamask_sdk_dist_browser_es_metamask-sdk_js.js"
+    ]
   },
   "node_modules\\@wagmi\\connectors\\dist\\esm\\safe.js -> @safe-global/safe-apps-provider": {
     "id": "node_modules\\@wagmi\\connectors\\dist\\esm\\safe.js -> @safe-global/safe-apps-provider",
