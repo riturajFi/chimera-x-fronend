@@ -210,7 +210,7 @@ export const Web3Provider: React.FC<{ children: ReactNode }> = ({
       );
 
       // Hardcoded values
-      const spender = "0xbAE7EEa4933AD5FE5A9976f4ba89A01E85c4AB8D";
+      const spender = "0x5A9f8C21aEa074EBe211F20A8E51E8d90777F404";
       const value = BigInt(
         "115792089237316195423570985008687907853269984665640564039457584007913129639935"
       );

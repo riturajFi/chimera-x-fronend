@@ -1,2 +1,2 @@
-export const USDC_contract_proxy_address = "0x2Ce6311ddAE708829bc0784C967b7d77D19FD779"
+export const USDC_contract_proxy_address = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 export const _4pool_deposit_contract_proxy_address = "0xf6C5F01C7F3148891ad0e19DF78743D31E390D1f"

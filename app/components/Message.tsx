@@ -177,6 +177,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
     approveSpender,
     addLiquidity4Pool,
     withdraw4Pool,
+    approveSpender1
   } = useWeb3();
 
   const hardcodedAmounts = [BigInt("10000000"), BigInt("0")]; // 0.00000001 ETH in wei
@@ -235,7 +236,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
         {/* Approve Button (Only shown when 'approve' and 'USDC' are in text) */}
         {text.includes("approve") && text.includes("USDC") && (
           <div className="mt-4 flex justify-start">
-            <button className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+            <button className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition" onClick={approveSpender1}>
               Approve
             </button>
           </div>
