@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import Message from "./Message";
 import ChatInput from "./ChatInput";
+import { useAddress } from "@coinbase/onchainkit/identity";
+import { useAccount } from "wagmi";
 
 interface Message {
   sender: "User" | "Bot";
@@ -20,8 +22,14 @@ const Chat: React.FC = () => {
   };
 
   const [messages, setMessages] = useState<Message[]>([]);
-
+  const {address} = useAccount()
+  const userWalletAddress = address
   const sendMessage = async (message: string) => {
+
+    if(message.includes("my") && message.includes("balance") && !(message.includes("pool") || message.includes("curve"))){
+      message = message + "My Wallet address is : " + userWalletAddress.toString()
+    }
+
     setMessages((prev) => [...prev, { sender: "User", text: message }]);
 
     try {
@@ -48,7 +56,7 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="w-3/4 flex flex-col bg-white rounded-extra-rounded ml-20 m-4 p-4 relative shadow-2xl border-2 border-green-200">
+    <div className="w-3/4 flex flex-col bg-white rounded-extra-rounded ml-20 m-4 p-4 relative shadow-2xl border-2 border-green-200 backdrop-blur-sm">
       <h1 className="text-3xl font-semibold text-gray-900 pl-7 pt-2">
         Chimera-X
       </h1>

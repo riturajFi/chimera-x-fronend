@@ -3,6 +3,7 @@ import { useWeb3 } from "../context/Web3Context";
 import { ethers } from "ethers";
 import { TransactionDefault } from "@coinbase/onchainkit/transaction";
 import { encodeFunctionData } from "viem";
+import { FundButton, FundCard } from "@coinbase/onchainkit/fund";
 
 // ✅ Define Message Props
 interface MessageProps {
@@ -229,8 +230,20 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
     } else if (parsedResponse.type === "yield") {
       messageContent = <OptimizedYieldMessage data={parsedResponse.data} />;
     }
+  } else if (
+    text.includes("Please click the following button to fund your wallet")
+  ) {
+    messageContent = <FundButton/>
   } else {
-    messageContent = <TextMessage text={text} />;
+    messageContent = (
+      <TextMessage
+        text={
+          text.indexOf("My Wallet address is") != -1
+            ? text.substring(0, text.indexOf("My Wallet address is")).trim()
+            : text
+        }
+      />
+    );
   }
 
   return (
@@ -260,7 +273,8 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
           sender === "Bot" ? "bg-green-200 py-6 px-10" : "bg-white"
         }`}
       >
-        <TransactionDefault
+        {messageContent}
+        {/* <TransactionDefault
           chainId={8453}
           calls={[
             {
@@ -269,7 +283,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
               value: BigInt(0),
             },
           ]}
-        />
+        /> */}
 
         {/* Approve Button (Only shown when 'approve' and 'USDC' are in text) */}
         {text.includes("approve") && text.includes("USDC") && (
