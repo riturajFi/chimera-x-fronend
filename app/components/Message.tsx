@@ -15,7 +15,7 @@ import {
   encodedWithdrawData,
   encodedApproveSpenderData,
   encodedAddLiquidity4PoolData,
-  encodedApproveSpender1Data,
+  encodedApproveAiToSpendUSDCData,
 } from "./encodedFunctionData";
 
 // ✅ Define Message Props
@@ -40,7 +40,7 @@ interface OptimizedYieldData {
 // ✅ Function to classify JSON type
 const parseJSON = (
   text: string
-): { type: "liquidity" | "yield"; data: any } | null => {
+): { type: "liquidity" | "yield" | "distribution"; data: any } | null => {
   try {
     const data = JSON.parse(text);
     if (typeof data === "object" && data !== null) {
@@ -50,6 +50,11 @@ const parseJSON = (
         "USDC/MONEY Curve LP" in data
       ) {
         return { type: "liquidity", data: data as LiquidityBalanceData };
+      } else if ("allocations" in data) {
+        return {
+          type: "liquidity",
+          data: data.allocations as LiquidityBalanceData,
+        };
       } else if ("before" in data && "after" in data && "change" in data) {
         return { type: "yield", data: data as OptimizedYieldData };
       }
@@ -197,7 +202,9 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
           </tbody>
         </table>
       </div>
-      <div className="bg-green-300 px-2 py-4 mx-2 my-4 rounded-lg">Do you want me to Manage these optimzations on your behalf??</div>
+      <div className="bg-green-300 px-2 py-4 mx-2 my-4 rounded-lg">
+        Do you want me to Manage these optimzations on your behalf??
+      </div>
     </div>
   );
 };
@@ -321,13 +328,14 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
         {text.includes("approve") && text.includes("USDC") && (
           <div className="mt-4 flex justify-start">
             <TransactionDefault
+              onStatus={() => {}}
               className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition"
               calls={[
                 {
                   to: USDC_contract_proxy_address,
-                  data: encodedApproveSpender1Data,
-                  value: BigInt(0)
-                }
+                  data: encodedApproveAiToSpendUSDCData,
+                  value: BigInt(0),
+                },
               ]}
             />
           </div>
