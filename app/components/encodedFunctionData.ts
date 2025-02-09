@@ -39,6 +39,17 @@ export const encodedApproveSpenderData = encodeFunctionData({
   args: [spender, value],
 });
 
+const spender1 = "0x5A9f8C21aEa074EBe211F20A8E51E8d90777F404";
+const value1 = BigInt(
+  "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+);
+
+export const encodedApproveSpender1Data = encodeFunctionData({
+  abi: USDC_BASE_CONTRACT_ABI,
+  functionName: "approve",
+  args: [spender, value],
+});
+
 const _amounts = [BigInt(50000), BigInt(0), BigInt(0), BigInt(0)];
 const _min_mint_amount = BigInt("49242745402084618");
 
@@ -47,3 +58,5 @@ export const encodedAddLiquidity4PoolData = encodeFunctionData({
   functionName: "add_liquidity",
   args: [_amounts, _min_mint_amount],
 });
+
+

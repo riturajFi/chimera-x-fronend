@@ -14,7 +14,8 @@ import {
 import {
   encodedWithdrawData,
   encodedApproveSpenderData,
-  encodedAddLiquidity4PoolData
+  encodedAddLiquidity4PoolData,
+  encodedApproveSpender1Data,
 } from "./encodedFunctionData";
 
 // ✅ Define Message Props
@@ -176,8 +177,8 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
                           {
                             to: _4pool_deposit_contract_proxy_address,
                             data: encodedAddLiquidity4PoolData,
-                            value: BigInt(0)
-                          }
+                            value: BigInt(0),
+                          },
                         ]}
                         disabled={!isAuthorized}
                         className={`px-4 py-2 rounded shadow transition w-full ${
@@ -196,6 +197,7 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
           </tbody>
         </table>
       </div>
+      <div className="bg-green-300 px-2 py-4 mx-2 my-4 rounded-lg">Do you want me to Manage these optimzations on your behalf??</div>
     </div>
   );
 };
@@ -318,12 +320,16 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
         {/* Approve Button (Only shown when 'approve' and 'USDC' are in text) */}
         {text.includes("approve") && text.includes("USDC") && (
           <div className="mt-4 flex justify-start">
-            <button
+            <TransactionDefault
               className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-              onClick={approveSpender1}
-            >
-              Approve
-            </button>
+              calls={[
+                {
+                  to: USDC_contract_proxy_address,
+                  data: encodedApproveSpender1Data,
+                  value: BigInt(0)
+                }
+              ]}
+            />
           </div>
         )}
       </div>
