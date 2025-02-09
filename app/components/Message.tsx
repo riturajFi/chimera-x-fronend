@@ -14,6 +14,7 @@ import {
 import {
   encodedWithdrawData,
   encodedApproveSpenderData,
+  encodedAddLiquidity4PoolData
 } from "./encodedFunctionData";
 
 // ✅ Define Message Props
@@ -170,17 +171,21 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
                       />
 
                       <span className="text-lg">⬇️</span>
-                      <button
-                        onClick={addLiquidity4Pool}
+                      <TransactionDefault
+                        calls={[
+                          {
+                            to: _4pool_deposit_contract_proxy_address,
+                            data: encodedAddLiquidity4PoolData,
+                            value: BigInt(0)
+                          }
+                        ]}
                         disabled={!isAuthorized}
                         className={`px-4 py-2 rounded shadow transition w-full ${
                           isAuthorized
                             ? "bg-green-500 text-white hover:scale-105"
                             : "bg-gray-400 text-gray-200 cursor-not-allowed"
                         }`}
-                      >
-                        Add Liquidity
-                      </button>
+                      />
                     </div>
                   ) : (
                     <span className="text-gray-500">No Action Needed</span>
