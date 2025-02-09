@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { useWeb3 } from "../context/Web3Context";
 import { ethers } from "ethers";
-import { TransactionDefault } from "@coinbase/onchainkit/transaction";
+import {
+  Transaction,
+  TransactionDefault,
+} from "@coinbase/onchainkit/transaction";
 import { encodeFunctionData } from "viem";
 import { FundButton, FundCard } from "@coinbase/onchainkit/fund";
+import { _4pool_deposit_contract_proxy_address, USDC_contract_proxy_address } from "../constants/contract_addresses";
+import { encodedWithdrawData,encodedApproveSpenderData } from "./encodedFunctionData";
 
 // ✅ Define Message Props
 interface MessageProps {
@@ -132,20 +137,30 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
                 </td>
                 <td className="p-3 border">
                   {data.change[key] < 0 ? (
-                    <button
-                      onClick={withdraw4Pool}
+                    <TransactionDefault
+                      calls={[
+                        {
+                          to: _4pool_deposit_contract_proxy_address,
+                          data: encodedWithdrawData,
+                          value: BigInt(0)
+                        },
+                      ]}
                       className="bg-red-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition w-full"
-                    >
-                      Withdraw
-                    </button>
+                    />
                   ) : data.change[key] > 0 ? (
                     <div className="flex flex-col items-center space-y-2 w-full">
-                      <button
-                        onClick={handleAuthorize}
+                      <TransactionDefault
+                        calls={[
+                          {
+                            to: USDC_contract_proxy_address,
+                            data: encodedApproveSpenderData,
+                            value: BigInt(0)
+
+                          }
+                        ]}
                         className="bg-yellow-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition w-full"
-                      >
-                        Authorize
-                      </button>
+                      />
+
                       <span className="text-lg">⬇️</span>
                       <button
                         onClick={addLiquidity4Pool}
@@ -182,6 +197,8 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
     withdraw4Pool,
     approveSpender1,
   } = useWeb3();
+
+  ///Encoded Approve Data
 
   const hardcodedAmounts = [BigInt("10000000"), BigInt("0")]; // 0.00000001 ETH in wei
   const hardcodedMinMintAmount = BigInt("10000000"); // Min mint amount (same small value)
@@ -233,7 +250,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
   } else if (
     text.includes("Please click the following button to fund your wallet")
   ) {
-    messageContent = <FundButton/>
+    messageContent = <FundButton />;
   } else {
     messageContent = (
       <TextMessage
