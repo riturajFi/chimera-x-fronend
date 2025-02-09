@@ -38,3 +38,12 @@ export const encodedApproveSpenderData = encodeFunctionData({
   functionName: "approve",
   args: [spender, value],
 });
+
+const _amounts = [BigInt(50000), BigInt(0), BigInt(0), BigInt(0)];
+const _min_mint_amount = BigInt("49242745402084618");
+
+export const encodedAddLiquidity4PoolData = encodeFunctionData({
+  abi: _4POOL_DEPOSIT_ABI,
+  functionName: "add_liquidity",
+  args: [_amounts, _min_mint_amount],
+});

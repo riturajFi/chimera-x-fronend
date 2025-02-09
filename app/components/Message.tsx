@@ -7,8 +7,14 @@ import {
 } from "@coinbase/onchainkit/transaction";
 import { encodeFunctionData } from "viem";
 import { FundButton, FundCard } from "@coinbase/onchainkit/fund";
-import { _4pool_deposit_contract_proxy_address, USDC_contract_proxy_address } from "../constants/contract_addresses";
-import { encodedWithdrawData,encodedApproveSpenderData } from "./encodedFunctionData";
+import {
+  _4pool_deposit_contract_proxy_address,
+  USDC_contract_proxy_address,
+} from "../constants/contract_addresses";
+import {
+  encodedWithdrawData,
+  encodedApproveSpenderData,
+} from "./encodedFunctionData";
 
 // ✅ Define Message Props
 interface MessageProps {
@@ -142,7 +148,7 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
                         {
                           to: _4pool_deposit_contract_proxy_address,
                           data: encodedWithdrawData,
-                          value: BigInt(0)
+                          value: BigInt(0),
                         },
                       ]}
                       className="bg-red-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition w-full"
@@ -154,10 +160,12 @@ const OptimizedYieldMessage: React.FC<{ data: OptimizedYieldData }> = ({
                           {
                             to: USDC_contract_proxy_address,
                             data: encodedApproveSpenderData,
-                            value: BigInt(0)
-
-                          }
+                            value: BigInt(0),
+                          },
                         ]}
+                        onSuccess={() => {
+                          setIsAuthorized(true);
+                        }}
                         className="bg-yellow-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition w-full"
                       />
 
